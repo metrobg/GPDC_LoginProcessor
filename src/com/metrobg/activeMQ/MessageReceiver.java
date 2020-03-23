@@ -71,8 +71,8 @@ public class MessageReceiver {
 
     static Connection getConnection(Connection dbConnection) throws SQLException {
         Properties prop = new Properties();
-        prop.setProperty("user", "develope");
-        prop.setProperty("password", "merlin");
+        prop.setProperty("user", "user");
+        prop.setProperty("password", "12345");
         dbConnection = DriverManager.getConnection("jdbc:oracle:thin:@192.168.144.234:1521:gpdc", prop);
         return dbConnection;
     }
