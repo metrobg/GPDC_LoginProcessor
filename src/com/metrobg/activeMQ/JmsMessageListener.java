@@ -2,15 +2,9 @@ package com.metrobg.activeMQ;
 
 // https://examples.javacodegeeks.com/enterprise-java/jms/jms-messagelistener-example/
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
-
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.advisory.ConsumerListener;
-import org.apache.activemq.broker.BrokerFactory;
-import org.apache.activemq.broker.BrokerService;
 
 public class JmsMessageListener {
     private static String user = "admin";
@@ -42,7 +36,7 @@ public class JmsMessageListener {
             Destination destination = session.createTopic("annual");
             MessageConsumer consumer = session.createConsumer(destination);
 
-            consumer.setMessageListener(new ConsumerMessageListener("Consumer"));
+            // consumer.setMessageListener(new ConsumerMessageListener("Consumer"));
             connection.start();
             Thread.sleep(1000);
             session.close();
