@@ -16,7 +16,7 @@ import java.util.Properties;
 public class MessageReceiver {
 
     // Name of the queue we will receive messages from
-    private static String subject = "login";
+    private static String subject = "GPDC-LOGIN";
     private static Connection dbConnection = null;
 
     public static void main(String[] args) throws JMSException, SQLException {
@@ -37,8 +37,6 @@ public class MessageReceiver {
         // Destination destination = session.createQueue(subject);
         Destination destination = session.createQueue(subject);
 
-        dbConnection = getConnection(dbConnection);
-        dbConnection.setAutoCommit(false);
 
         // MessageConsumer is used for receiving (consuming) messages
         MessageConsumer consumer = session.createConsumer(destination);
@@ -46,35 +44,32 @@ public class MessageReceiver {
         List messageList = getMessageList(destination, session);
         int cnt = 0;
         Message message = null;
+        System.out.println("Messages Pending: " + messageList.size());
+        System.out.println("MessageReceiver is Running.");
+
+        // System.exit(1);
+
+        dbConnection = getConnection(dbConnection);
+        dbConnection.setAutoCommit(false);
 
         // Here we receive the message.
-        ConsumerMessageListener consumerListener = (new ConsumerMessageListener("Consumer", dbConnection, messageList.size()));
+        ConsumerMessageListener consumerListener = (new ConsumerMessageListener("GPDC_Processor", dbConnection, 1));
+        consumer.setMessageListener(consumerListener);   //mbg
 
-        System.out.println("MessageReceiver is Running.");
-        while (cnt < messageList.size()) {
-            message = consumer.receive();
-            if (message instanceof TextMessage) {
-                TextMessage textMessage = (TextMessage) message;
-                System.out.println("The message is: " + textMessage.getText());
-                consumerListener.processMessage(textMessage.getText(), dbConnection);
-            }
-            cnt++;
-        }
-        try {
-            if (!dbConnection.isClosed()) {
-                dbConnection.close();
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
     }
 
     static Connection getConnection(Connection dbConnection) throws SQLException {
-        Properties prop = new Properties();
-        prop.setProperty("user", "user");
-        prop.setProperty("password", "12345");
-        dbConnection = DriverManager.getConnection("jdbc:oracle:thin:@192.168.144.234:1521:gpdc", prop);
-        return dbConnection;
+        try {
+            Properties prop = new Properties();
+            prop.setProperty("user", "develope");
+            prop.setProperty("password", "merlin");
+            dbConnection = DriverManager.getConnection("jdbc:oracle:thin:@192.168.144.234:1521:gpdc", prop);
+            return dbConnection;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("unable to connect to Oracle");
+        }
+        return null;
     }
 
     static List getMessageList(Destination d, Session session) throws JMSException {
