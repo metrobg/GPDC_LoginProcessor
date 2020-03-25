@@ -25,7 +25,7 @@ public class ConsumerMessageListener implements MessageListener {
 
                 if (message instanceof TextMessage) {
                     TextMessage textMessage = (TextMessage) message;
-                    System.out.println("The message is: " + textMessage.getText());
+                    System.out.print("Payload: " + textMessage.getText() + "  ");
                     processMessage(textMessage.getText(), conn);
                 }
                 cnt++;
@@ -53,10 +53,17 @@ public class ConsumerMessageListener implements MessageListener {
             PreparedStatement ps = dbConnection.prepareStatement(insertStatement);
 
             ps.setString(1, holder.get("User"));
-            ps.setString(2, holder.get("RemoteHost"));
+            if (holder.get("RemoteHost").toUpperCase().equals("OUT")) {
+                ps.setString(2, "LOGOUT");
+                ps.setString(5, "OUT");
+            } else {
+                ps.setString(2, holder.get("RemoteHost"));
+                ps.setString(5, holder.get("in_out"));
+            }
+
             ps.setString(3, holder.get("ComputerName"));
             ps.setString(4, holder.get("TimeStamp"));
-            ps.setString(5, holder.get("in_out"));
+
             ps.execute();
             System.out.println("Record inserted");
             conn.commit();
