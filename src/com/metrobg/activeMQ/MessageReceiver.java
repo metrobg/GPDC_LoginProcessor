@@ -44,7 +44,6 @@ public class MessageReceiver {
         List messageList = getMessageList(destination, session);
         int cnt = 0;
         Message message = null;
-        System.out.println("Messages Pending: " + messageList.size());
         System.out.println("MessageReceiver is Running.");
 
         // System.exit(1);
