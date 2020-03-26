@@ -50,7 +50,7 @@ public class MessageReceiver {
         List messageList = getMessageList(destination, session);
         int cnt = 0;
         Message message = null;
-        System.out.println("MessageReceiver is Running.");
+        System.out.println("MessageReceiver is Running. host: " + url);
 
         // System.exit(1);
 
