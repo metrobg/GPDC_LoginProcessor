@@ -18,15 +18,21 @@ public class MessageReceiver {
     // Name of the queue we will receive messages from
     private static String subject = "GPDC-LOGIN";
     private static Connection dbConnection = null;
+    private static boolean TEST = false;
 
     public static void main(String[] args) throws JMSException, SQLException {
         // Getting JMS connection from the server
         // URL of the JMS server
-        DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
         String url = "tcp://192.168.144.172:61616";
         String user = "admin";
         String password = "Ign32ORw3C4b";
 
+        DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+        if(TEST) {
+           url = "tcp://192.168.10.66:61616";
+           user = "admin";
+           password = "admin";
+        }
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
         javax.jms.Connection connection = connectionFactory.createConnection(user, password);
         connection.start();
