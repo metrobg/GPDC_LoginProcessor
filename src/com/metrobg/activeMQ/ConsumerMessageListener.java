@@ -39,30 +39,35 @@ public class ConsumerMessageListener implements MessageListener {
 
     public void processMessage(String message, Connection dbConnection) throws SQLException {
 
-        HashMap<String, String> holder;
-        holder = new HashMap();
+        HashMap<String, String> payload;
+        payload = new HashMap();
 
         String[] keyVals = message.split(";");
         for (String keyVal : keyVals) {
             String[] parts = keyVal.split("=", 2);
-            holder.put(parts[0], parts[1]);
+            payload.put(parts[0], parts[1]);
         }
         try {
             String insertStatement = "insert into GPDC_DOMAIN_LOGIN (USER_NAME,REMOTE_HOST,LOCAL_HOST,DATE_TIME,IN_OUT) " +
                     "VALUES(?,?,?,to_date(?,'mm/dd/yyyy HH:mi:ss AM'),?)";
             PreparedStatement ps = dbConnection.prepareStatement(insertStatement);
 
-            ps.setString(1, holder.get("User"));
-            if (holder.get("RemoteHost").toUpperCase().equals("OUT")) {
+
+            if(payload.get("RemoteHost").contains("'")) {           // macs are using a single quote as part of the machine name
+                payload.put("RemoteHost", payload.get("RemoteHost")  + " " + payload.get("in_out"));
+                ps.setString(5, "IN");
+            }
+            ps.setString(1, payload.get("User"));
+            if (payload.get("RemoteHost").toUpperCase().equals("OUT")) {
                 ps.setString(2, "LOGOUT");
                 ps.setString(5, "OUT");
             } else {
-                ps.setString(2, holder.get("RemoteHost"));
-                ps.setString(5, holder.get("in_out"));
+                ps.setString(2, payload.get("RemoteHost"));
+                ps.setString(5, "IN");
             }
 
-            ps.setString(3, holder.get("ComputerName"));
-            ps.setString(4, holder.get("TimeStamp"));
+            ps.setString(3, payload.get("ComputerName"));
+            ps.setString(4, payload.get("TimeStamp"));
 
             ps.execute();
             System.out.println("Record inserted");
