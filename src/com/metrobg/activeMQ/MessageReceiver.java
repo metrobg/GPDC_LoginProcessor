@@ -20,18 +20,23 @@ public class MessageReceiver {
     private static Connection dbConnection = null;
     private static boolean TEST = false;
 
+
     public static void main(String[] args) throws JMSException, SQLException {
         // Getting JMS connection from the server
         // URL of the JMS server
         String url = "tcp://192.168.144.172:61616";
         String user = "admin";
         String password = "Ign32ORw3C4b";
+        String Oracleurl = "jdbc:oracle:thin:@192.168.60.8:1521:gpdc";
+        String ip_Address = "db/168.60.8 - broker/144.172";
 
         DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
         if(TEST) {
-           url = "tcp://192.168.10.66:61616";
-           user = "admin";
-           password = "admin";
+           url        = "tcp://192.168.10.66:61616";
+           Oracleurl  = "jdbc:oracle:thin:@192.168.144.234:1521:gpdc";
+           user       = "admin";
+           password   = "admin";
+           ip_Address = "db/168.144.234 - broker/10.66";
         }
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
         javax.jms.Connection connection = connectionFactory.createConnection(user, password);
@@ -50,11 +55,11 @@ public class MessageReceiver {
         List messageList = getMessageList(destination, session);
         int cnt = 0;
         Message message = null;
-        System.out.println("MessageReceiver is Running. host: " + url);
+        System.out.println("MessageReceiver is Running. host: " + ip_Address);
 
         // System.exit(1);
 
-        dbConnection = getConnection(dbConnection);
+        dbConnection = getConnection(dbConnection,Oracleurl);
         dbConnection.setAutoCommit(false);
 
         // Here we receive the message.
@@ -63,12 +68,12 @@ public class MessageReceiver {
 
     }
 
-    static Connection getConnection(Connection dbConnection) throws SQLException {
+    static Connection getConnection(Connection dbConnection,String jdbcURL) throws SQLException {
         try {
             Properties prop = new Properties();
             prop.setProperty("user", "develope");
             prop.setProperty("password", "merlin");
-            dbConnection = DriverManager.getConnection("jdbc:oracle:thin:@192.168.144.234:1521:gpdc", prop);
+            dbConnection = DriverManager.getConnection(jdbcURL, prop);
             return dbConnection;
         } catch (SQLException e) {
             e.printStackTrace();
