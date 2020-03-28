@@ -55,6 +55,9 @@ public class MessageReceiver {
         List messageList = getMessageList(destination, session);
         int cnt = 0;
         Message message = null;
+        if(TEST) {
+            System.out.println("**** TEST MODE!  TEST!  TEST!  TEST!  TEST! ****");
+        }
         System.out.println("MessageReceiver is Running. host: " + ip_Address);
 
         // System.exit(1);
