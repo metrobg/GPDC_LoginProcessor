@@ -3,11 +3,8 @@ package com.metrobg.activeMQ;
 // https://examples.javacodegeeks.com/enterprise-java/jms/jms-messagelistener-example/
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.BrokerFactory;
-import org.apache.activemq.broker.BrokerService;
 
 import javax.jms.*;
-import java.net.URI;
 
 public class JmsMessageListener {
     /*private static String user = "admin";
@@ -29,22 +26,22 @@ public class JmsMessageListener {
 
 
             Queue queue = session.createQueue("TestQueue");
-            String payload = "Important Task";
+            String payload = "User=anatasha;RemoteHost=OUT;ComputerName=GPDC-TERM;TimeStamp=3/26/2020 1:12:38 PM;in_out=IN";
             Message msg = session.createTextMessage(payload);
             MessageProducer producer = session.createProducer(queue);
             System.out.println("Sending text '" + payload + "'");
             producer.send(msg);
 
 
-            connection.start();
+            //connection.start();
             // Consumer
-            Destination destination = session.createQueue("TestQueue");
+            /*Destination destination = session.createQueue("TestQueue");
             MessageConsumer consumer = session.createConsumer(destination);
             Message message = consumer.receive(1000);
             if (message instanceof TextMessage) {
                 TextMessage textMessage = (TextMessage) message;
                 System.out.println("Payload: " + textMessage.getText() + "  ");
-            }
+            }*/
 
             // consumer.setMessageListener(new ConsumerMessageListener("Consumer"));
 
