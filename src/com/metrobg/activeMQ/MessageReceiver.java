@@ -15,30 +15,31 @@ import java.util.Properties;
 
 public class MessageReceiver {
 
-    // Name of the queue we will receive messages from
-    private static String subject = "GPDC-LOGIN";
     private static Connection dbConnection = null;
-    private static boolean TEST = false;
-
+    private static String Oracleurl = "jdbc:oracle:thin:@192.168.60.8:1521:gpdc";
 
     public static void main(String[] args) throws JMSException, SQLException {
         // Getting JMS connection from the server
         // URL of the JMS server
-        String url = "tcp://192.168.144.172:61616";
+        boolean TEST = false;
+        String subject = "GPDC-LOGIN";
+        String brokerURL = "tcp://192.168.144.172:61616";
         String user = "admin";
         String password = "Ign32ORw3C4b";
-        String Oracleurl = "jdbc:oracle:thin:@192.168.60.8:1521:gpdc";
+        Oracleurl = "jdbc:oracle:thin:@192.168.60.8:1521:gpdc";
         String ip_Address = "db/168.60.8 - broker/144.172";
 
         DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
-        if(TEST) {
-           url        = "tcp://192.168.10.66:61616";
-           Oracleurl  = "jdbc:oracle:thin:@192.168.144.234:1521:gpdc";
-           user       = "admin";
-           password   = "admin";
-           ip_Address = "db/168.144.234 - broker/10.66";
+
+        if (TEST) {
+            subject = "TestQueue";
+            brokerURL = "tcp://192.168.10.66:61616";
+            Oracleurl = "jdbc:oracle:thin:@192.168.144.234:1521:gpdc";
+            user = "admin";
+            password = "admin";
+            ip_Address = "db/168.144.234 - broker/10.66";
         }
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
+        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerURL);
         javax.jms.Connection connection = connectionFactory.createConnection(user, password);
         connection.start();
 
@@ -46,6 +47,8 @@ public class MessageReceiver {
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
         // Destination destination = session.createQueue(subject);
+        // Name of the queue we will receive messages from
+
         Destination destination = session.createQueue(subject);
 
 
@@ -55,32 +58,32 @@ public class MessageReceiver {
         List messageList = getMessageList(destination, session);
         int cnt = 0;
         Message message = null;
-        if(TEST) {
+        if (TEST) {
             System.out.println("**** TEST MODE!  TEST!  TEST!  TEST!  TEST! ****");
         }
         System.out.println("MessageReceiver is Running. host: " + ip_Address);
 
         // System.exit(1);
-
-        dbConnection = getConnection(dbConnection,Oracleurl);
-        dbConnection.setAutoCommit(false);
+        dbConnection = getConnection();
 
         // Here we receive the message.
         ConsumerMessageListener consumerListener = (new ConsumerMessageListener("GPDC_Processor", dbConnection, 1));
         consumer.setMessageListener(consumerListener);   //mbg
-
     }
 
-    static Connection getConnection(Connection dbConnection,String jdbcURL) throws SQLException {
+    static Connection getConnection() throws SQLException {
         try {
             Properties prop = new Properties();
             prop.setProperty("user", "develope");
             prop.setProperty("password", "merlin");
-            dbConnection = DriverManager.getConnection(jdbcURL, prop);
+            Connection dbConnection = DriverManager.getConnection(Oracleurl, prop);
+            dbConnection.setAutoCommit(false);
             return dbConnection;
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("unable to connect to Oracle");
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
         }
         return null;
     }
