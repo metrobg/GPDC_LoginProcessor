@@ -6,12 +6,12 @@ import java.sql.Connection;
 import java.util.*;
 
 public class ConsumerMessageListener implements MessageListener {
-    private Connection conn;
+    private Connection dbConnection;
     private long messageCount;
     private String consumerName;
 
     public ConsumerMessageListener(String consumerName, Connection dbConnection, long kount) {
-        this.conn = dbConnection;
+        this.dbConnection = dbConnection;
         this.messageCount = kount;
         this.consumerName = consumerName;
     }
@@ -26,7 +26,7 @@ public class ConsumerMessageListener implements MessageListener {
                 if (message instanceof TextMessage) {
                     TextMessage textMessage = (TextMessage) message;
                     System.out.print("Payload: " + textMessage.getText() + "  ");
-                    processMessage(textMessage.getText(), conn);
+                    processMessage(textMessage.getText(), dbConnection);
                 }
                 cnt++;
             }
@@ -48,13 +48,16 @@ public class ConsumerMessageListener implements MessageListener {
             payload.put(parts[0], parts[1]);
         }
         try {
+            if ((dbConnection == null) || (dbConnection.isClosed())) {
+                dbConnection = MessageReceiver.getConnection();
+            }
             String insertStatement = "insert into GPDC_DOMAIN_LOGIN (USER_NAME,REMOTE_HOST,LOCAL_HOST,DATE_TIME,IN_OUT) " +
                     "VALUES(?,?,?,to_date(?,'mm/dd/yyyy HH:mi:ss AM'),?)";
             PreparedStatement ps = dbConnection.prepareStatement(insertStatement);
 
 
-            if(payload.get("RemoteHost").contains("'")) {           // macs are using a single quote as part of the machine name
-                payload.put("RemoteHost", payload.get("RemoteHost")  + " " + payload.get("in_out"));
+            if (payload.get("RemoteHost").contains("'")) {           // macs are using a single quote as part of the machine name
+                payload.put("RemoteHost", payload.get("RemoteHost") + " " + payload.get("in_out"));
                 ps.setString(5, "IN");
             }
             ps.setString(1, payload.get("User"));
@@ -71,10 +74,13 @@ public class ConsumerMessageListener implements MessageListener {
 
             ps.execute();
             System.out.println("Record inserted");
-            conn.commit();
-
+            dbConnection.commit();
+            ps.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            this.dbConnection.close();
+            System.out.println("ConsumerMessageListener done.");
         }
     }
 
