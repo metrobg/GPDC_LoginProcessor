@@ -74,9 +74,9 @@ public class MessageReceiver {
     static Connection getConnection() throws SQLException {
         try {
             Properties prop = new Properties();
-            prop.setProperty("user", "develope");
-            prop.setProperty("password", "merlin");
-            Connection dbConnection = DriverManager.getConnection(Oracleurl, prop);
+            // prop.setProperty("user", "develope");
+            // prop.setProperty("password", "merlin");
+            Connection dbConnection = DriverManager.getConnection(Oracleurl, "develope", "merlin");
             dbConnection.setAutoCommit(false);
             return dbConnection;
         } catch (SQLException e) {
