@@ -27,10 +27,10 @@ public class ConsumerMessageListener implements MessageListener {
                     TextMessage textMessage = (TextMessage) message;
                     System.out.print("Payload: " + textMessage.getText() + "  ");
                     processMessage(textMessage.getText(), dbConnection);
+                    message.acknowledge();     // acknowledge message after processing
                 }
                 cnt++;
             }
-
 
         } catch (Exception e) {
             System.out.println("Exception caught");
@@ -78,9 +78,9 @@ public class ConsumerMessageListener implements MessageListener {
             ps.close();
         } catch (SQLException e) {
             e.printStackTrace();
+            System.exit(1); // shutdown if errors inserting message not acknowledged and will remain at broker
         } finally {
             this.dbConnection.close();
-            System.out.println("ConsumerMessageListener done.");
         }
     }
 
