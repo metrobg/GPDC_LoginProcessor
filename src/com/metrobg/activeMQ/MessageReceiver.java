@@ -10,12 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
 
 
 public class MessageReceiver {
 
-    private static Connection dbConnection = null;
     private static String Oracleurl = "jdbc:oracle:thin:@192.168.60.8:1521:gpdc";
 
     public static void main(String[] args) throws JMSException, SQLException {
@@ -44,19 +42,19 @@ public class MessageReceiver {
         connection.start();
 
         // Creating session for sending messages
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 
         // Destination destination = session.createQueue(subject);
         // Name of the queue we will receive messages from
 
         Destination destination = session.createQueue(subject);
 
-
         // MessageConsumer is used for receiving (consuming) messages
         MessageConsumer consumer = session.createConsumer(destination);
 
+
         List messageList = getMessageList(destination, session);
-        int cnt = 0;
+
         Message message = null;
         if (TEST) {
             System.out.println("**** TEST MODE!  TEST!  TEST!  TEST!  TEST! ****");
@@ -64,18 +62,16 @@ public class MessageReceiver {
         System.out.println("MessageReceiver is Running. host: " + ip_Address);
 
         // System.exit(1);
-        dbConnection = getConnection();
+        Connection dbConnection = getConnection();
 
         // Here we receive the message.
-        ConsumerMessageListener consumerListener = (new ConsumerMessageListener("GPDC_Processor", dbConnection, 1));
+        ConsumerMessageListener consumerListener = (new ConsumerMessageListener(dbConnection, 1));
         consumer.setMessageListener(consumerListener);   //mbg
+
     }
 
     static Connection getConnection() throws SQLException {
         try {
-            Properties prop = new Properties();
-            // prop.setProperty("user", "develope");
-            // prop.setProperty("password", "merlin");
             Connection dbConnection = DriverManager.getConnection(Oracleurl, "develope", "merlin");
             dbConnection.setAutoCommit(false);
             return dbConnection;
@@ -92,7 +88,7 @@ public class MessageReceiver {
 
         QueueBrowser browser = session.createBrowser((Queue) d);
         Enumeration enu = browser.getEnumeration();
-        List list = new ArrayList();
+        ArrayList list = new ArrayList();
         while (enu.hasMoreElements()) {
             TextMessage message = (TextMessage) enu.nextElement();
             list.add(message.getText());
