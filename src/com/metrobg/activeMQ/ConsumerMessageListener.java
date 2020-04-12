@@ -1,9 +1,12 @@
 package com.metrobg.activeMQ;
 
-import javax.jms.*;
-import java.sql.*;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import java.sql.Connection;
-import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashMap;
 
 public class ConsumerMessageListener implements MessageListener {
     private Connection dbConnection;
@@ -49,12 +52,13 @@ public class ConsumerMessageListener implements MessageListener {
             }
             String insertStatement = "insert into GPDC_DOMAIN_LOGIN (USER_NAME,REMOTE_HOST,LOCAL_HOST,DATE_TIME,IN_OUT,CONSUMER_ID) " +
                     "VALUES(?,?,?,to_date(?,'mm/dd/yyyy HH:mi:ss AM'),?,?)";
-            PreparedStatement ps = null;
+            PreparedStatement ps;
             if (dbConnection != null) {
                 ps = dbConnection.prepareStatement(insertStatement);
-                if (payload.get("RemoteHost").contains("'")) {           // macs are using a single quote as part of the machine name
-                    payload.put("RemoteHost", payload.get("RemoteHost") + " " + payload.get("in_out"));
-                    ps.setString(5, "IN");
+
+                String tmp = payload.get("RemoteHost");
+                if (payload.get("RemoteHost").indexOf(8217) > 0) {           // macs are using an apostrophe as part of the machine name
+                    payload.put("RemoteHost", tmp + " " + payload.get("in_out"));
                 }
                 ps.setString(1, payload.get("User"));
                 if (payload.get("RemoteHost").toUpperCase().equals("OUT")) {
