@@ -4,11 +4,13 @@ package com.metrobg.activeMQ;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import javax.jms.Queue;
 import javax.jms.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 
 
 public class JmsMessageListener {
@@ -45,7 +47,9 @@ public class JmsMessageListener {
                 MessageProducer producer = session.createProducer(queue);
                 // send multiple test messages
                 for (int i = 1; i <= 1; i++) {
-                    payload = "User=testUser-" + i + ";RemoteHost=TestUser's;ComputerName=GPDC-TERM;TimeStamp=" + strDate + ";in_out=IPAD";
+                    //  payload = "User=testUser-" + i + ";RemoteHost=TestUser's;ComputerName=GPDC-TERM;TimeStamp=" + strDate + ";in_out=IPAD";
+                    payload = "User=MARICELA;RemoteHost=Maricela’s;ComputerName=GPDC-TERM2;TimeStamp=" + strDate + ";in_out=MACBO";
+
                     Message msg = session.createTextMessage(payload);
                     System.out.println("Sending text '" + payload + "'");
                     producer.send(msg);
